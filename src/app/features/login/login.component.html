@@ -1,0 +1,116 @@
+<div class="login-page">
+
+  <div class="login-container">
+
+    <div class="brand-section">
+
+      <div class="logo">
+        RX
+      </div>
+
+      <h1>
+        ReconcileX
+      </h1>
+
+      <p>
+        Order & Payment Reconciliation Platform
+      </p>
+
+    </div>
+
+
+    <div class="login-card">
+
+      <h2>
+        Welcome back
+      </h2>
+
+      <p class="subtitle">
+        Sign in to access your reconciliation workspace.
+      </p>
+
+
+      @if (errorMessage) {
+
+        <div class="error-message">
+          {{ errorMessage }}
+        </div>
+
+      }
+
+
+      <form (ngSubmit)="login()">
+
+        <div class="form-group">
+
+          <label for="email">
+            Email
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            placeholder="you@example.com"
+            required
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="password">
+            Password
+          </label>
+
+          <input
+            id="password"
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Enter your password"
+            required
+          />
+
+        </div>
+
+
+        <button
+          type="submit"
+          [disabled]="!email || !password">
+
+          Sign In
+
+        </button>
+
+      </form>
+
+
+      <div class="signup-link">
+
+        <span>
+          Don't have an account?
+        </span>
+
+        <button
+          type="button"
+          (click)="goToSignup()">
+
+          Sign Up
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="footer">
+      ReconcileX · Order & Payment Reconciliation
+    </div>
+
+  </div>
+
+</div>

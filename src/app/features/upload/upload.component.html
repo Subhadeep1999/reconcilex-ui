@@ -1,0 +1,96 @@
+<div class="page">
+
+    <header class="header">
+        <div>
+            <div class="brand">ReconcileX</div>
+            <span>Order & Payment Reconciliation</span>
+        </div>
+
+        <button class="logout" type="button" (click)="logout()">
+            Logout
+        </button>
+    </header>
+
+    <main class="content">
+
+        <section class="intro">
+            <h1>Import reconciliation data</h1>
+            <p>
+                Upload the Orders and Payments CSV files to begin reconciliation.
+            </p>
+        </section>
+
+        <section class="upload-grid">
+
+            <div class="upload-card">
+
+                <div class="icon">01</div>
+
+                <h2>Orders CSV</h2>
+
+                <p>
+                    Select the order transaction file.
+                </p>
+
+                <label class="file-picker">
+                    <span>
+                        {{ ordersFile?.name ?? 'Choose Orders CSV' }}
+                    </span>
+
+                    <input type="file" accept=".csv,text/csv" (change)="onOrdersFileSelected($event)" />
+                </label>
+
+                @if (ordersFile) {
+                <div class="selected">
+                    ✓ {{ ordersFile.name }}
+                </div>
+                }
+
+            </div>
+
+            <div class="upload-card">
+
+                <div class="icon">02</div>
+
+                <h2>Payments CSV</h2>
+
+                <p>
+                    Select the payment transaction file.
+                </p>
+
+                <label class="file-picker">
+                    <span>
+                        {{ paymentsFile?.name ?? 'Choose Payments CSV' }}
+                    </span>
+
+                    <input type="file" accept=".csv,text/csv" (change)="onPaymentsFileSelected($event)" />
+                </label>
+
+                @if (paymentsFile) {
+                <div class="selected">
+                    ✓ {{ paymentsFile.name }}
+                </div>
+                }
+
+            </div>
+
+        </section>
+
+        @if (errorMessage) {
+        <div class="error">
+            {{ errorMessage }}
+        </div>
+        }
+
+        <button class="primary-button" type="button" (click)="upload()"
+            [disabled]="loading || !ordersFile || !paymentsFile">
+            @if (loading) {
+            Uploading...
+            } @else {
+            Upload & Continue
+            }
+        </button>
+
+    </main>
+
+</div>

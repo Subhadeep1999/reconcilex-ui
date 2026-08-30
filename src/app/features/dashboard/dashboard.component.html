@@ -1,0 +1,807 @@
+<div class="dashboard">
+
+  <!-- HEADER -->
+
+<header class="header">
+
+  <div class="brand-section">
+
+    <div class="brand">
+      ReconcileX
+    </div>
+
+    <div class="subtitle">
+      Order & Payment Reconciliation
+    </div>
+
+  </div>
+
+  <button
+    type="button"
+    class="secondary-button"
+    (click)="logout()">
+
+    Logout
+
+  </button>
+
+</header>
+
+
+  <main class="content">
+
+    @if (loading) {
+
+      <div class="loading">
+        Loading reconciliation data...
+      </div>
+
+    } @else {
+
+      <!-- PAGE HEADING -->
+
+<div class="page-heading">
+
+  <div>
+
+    <h1>
+      Reconciliation Dashboard
+    </h1>
+
+    <p>
+      Batch #{{ batchId }}
+    </p>
+
+  </div>
+
+  <div class="page-actions">
+
+    <button
+      type="button"
+      class="secondary-button"
+      (click)="goToUpload()">
+
+      New Import
+
+    </button>
+
+    <button
+      type="button"
+      class="primary-button"
+      [disabled]="reconciling"
+      (click)="runReconciliation()">
+
+      @if (reconciling) {
+        Reconciling...
+      } @else {
+        Run Reconciliation
+      }
+
+    </button>
+
+  </div>
+
+</div>
+
+
+      <!-- ERROR -->
+
+      @if (errorMessage) {
+
+        <div class="error">
+          {{ errorMessage }}
+        </div>
+
+      }
+
+
+      @if (summary) {
+
+        <!-- KPI CARDS -->
+
+        <section class="metrics">
+
+          <div class="metric-card">
+
+            <span>Total References</span>
+
+            <strong>
+              {{ summary.totalReferences }}
+            </strong>
+
+          </div>
+
+
+          <div class="metric-card matched">
+
+            <span>Matched</span>
+
+            <strong>
+              {{ summary.matchedCount }}
+            </strong>
+
+          </div>
+
+
+          <div class="metric-card warning">
+
+            <span>Warnings</span>
+
+            <strong>
+              {{ summary.warningCount }}
+            </strong>
+
+          </div>
+
+
+          <div class="metric-card discrepancy">
+
+            <span>Discrepancies</span>
+
+            <strong>
+              {{ summary.discrepancyCount }}
+            </strong>
+
+          </div>
+
+
+          <div class="metric-card risk">
+
+            <span>Money at Risk</span>
+
+            <strong>
+              {{ formatAmount(summary.moneyAtRisk) }}
+            </strong>
+
+          </div>
+
+        </section>
+
+
+        <!-- VALUE SUMMARY -->
+
+        <section class="value-grid">
+
+          <div class="value-card">
+
+            <span>Matched Value</span>
+
+            <strong>
+              {{ formatAmount(summary.matchedValue) }}
+            </strong>
+
+          </div>
+
+
+          <div class="value-card">
+
+            <span>Discrepancy Value</span>
+
+            <strong>
+              {{ formatAmount(summary.discrepancyValue) }}
+            </strong>
+
+          </div>
+
+        </section>
+
+        <!-- AI ANALYSIS -->
+
+        <section class="ai-section">
+
+  <div class="section-heading ai-heading">
+
+    <div>
+
+      <h2>
+        AI Reconciliation Insights
+      </h2>
+
+      <p>
+        AI-generated analysis of the reconciliation exceptions
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      [disabled]="aiLoading"
+      (click)="analyzeWithAi()">
+
+      @if (aiLoading) {
+        Analyzing...
+      } @else {
+        Analyze with AI
+      }
+
+    </button>
+
+  </div>
+
+  @if (aiError) {
+
+    <div class="ai-error">
+      {{ aiError }}
+    </div>
+
+  }
+
+  @if (aiLoading) {
+
+    <div class="ai-loading">
+      Generating reconciliation insights...
+    </div>
+
+  }
+
+  @if (aiAnalysis; as analysis) {
+
+    <div class="ai-content">
+
+      <!-- Executive Summary -->
+
+      <div class="ai-block">
+
+        <h3>
+          Executive Summary
+        </h3>
+
+        <p>
+          {{ analysis.executiveSummary }}
+        </p>
+
+      </div>
+
+      <!-- Key Findings -->
+
+      <div class="ai-block">
+
+        <h3>
+          Key Findings
+        </h3>
+
+        <ul>
+
+          @for (finding of analysis.keyFindings; track finding) {
+
+            <li>
+              {{ finding }}
+            </li>
+
+          }
+
+        </ul>
+
+      </div>
+
+      <!-- Risk Analysis -->
+
+      <div class="ai-block">
+
+        <h3>
+          Risk Analysis
+        </h3>
+
+        <p>
+          {{ analysis.riskAnalysis }}
+        </p>
+
+      </div>
+
+      <!-- Recommendations -->
+
+      <div class="ai-block">
+
+        <h3>
+          Recommendations
+        </h3>
+
+        <ol>
+
+          @for (
+            recommendation of analysis.recommendations;
+            track recommendation
+          ) {
+
+            <li>
+              {{ recommendation }}
+            </li>
+
+          }
+
+        </ol>
+
+      </div>
+
+    </div>
+
+  }
+
+</section>
+
+
+        <!-- DISCREPANCY CHART -->
+
+        <section class="chart-section">
+
+          <div class="section-heading">
+
+            <div>
+
+              <h2>
+                Discrepancy Breakdown
+              </h2>
+
+              <p>
+                Distribution of reconciliation exceptions by type
+              </p>
+
+            </div>
+
+          </div>
+
+
+          @if (discrepancyChart.length === 0) {
+
+            <div class="empty">
+              No discrepancy data available.
+            </div>
+
+          } @else {
+
+            <div class="chart">
+
+              @for (
+                item of discrepancyChart;
+                track item.type
+              ) {
+
+                <div class="chart-row">
+
+                  <div class="chart-label">
+
+                    <span>
+                      {{ item.type }}
+                    </span>
+
+                    <strong>
+                      {{ item.count }}
+                    </strong>
+
+                  </div>
+
+                  <div class="bar-container">
+
+                    <div
+                      class="bar"
+                      [style.width]="
+                        getChartWidth(item.count)
+                      ">
+                    </div>
+
+                  </div>
+
+                  <span class="percentage">
+                    {{ item.percentage }}%
+                  </span>
+
+                </div>
+
+              }
+
+            </div>
+
+          }
+
+        </section>
+
+
+        <!-- DISCREPANCIES -->
+
+        <section class="discrepancy-section">
+
+          <div class="section-heading">
+
+            <div>
+
+              <h2>
+                Discrepancies
+              </h2>
+
+              <p>
+                Exceptions identified during reconciliation
+              </p>
+
+            </div>
+
+            <span class="count">
+              {{ filteredDiscrepancies.length }}
+            </span>
+
+          </div>
+
+
+          <!-- FILTERS -->
+
+          <div class="filters">
+
+            <div class="search-box">
+
+              <label for="search">
+                Search
+              </label>
+
+              <input
+                id="search"
+                type="text"
+                [(ngModel)]="searchTerm"
+                placeholder="Order, transaction, type or reason..."
+              />
+
+            </div>
+
+
+            <div class="filter-box">
+
+              <label for="type">
+                Discrepancy Type
+              </label>
+
+              <select
+                id="type"
+                [(ngModel)]="selectedType">
+
+                @for (
+                  type of discrepancyTypes;
+                  track type
+                ) {
+
+                  <option [value]="type">
+                    {{ type === 'ALL' ? 'All Types' : type }}
+                  </option>
+
+                }
+
+              </select>
+
+            </div>
+
+
+            @if (
+              searchTerm ||
+              selectedType !== 'ALL'
+            ) {
+
+              <button
+                type="button"
+                class="clear-button"
+                (click)="clearFilters()">
+
+                Clear Filters
+
+              </button>
+
+            }
+
+          </div>
+
+
+          <!-- TABLE -->
+
+          @if (filteredDiscrepancies.length === 0) {
+
+            <div class="empty">
+
+              <div class="empty-title">
+                No discrepancies found
+              </div>
+
+              <div>
+                Try changing your search or filter.
+              </div>
+
+            </div>
+
+          } @else {
+
+            <div class="table-wrapper">
+
+              <table>
+
+                <thead>
+
+                  <tr>
+
+                    <th>Order Reference</th>
+                    <th>Transaction</th>
+                    <th>Type</th>
+                    <th>Expected</th>
+                    <th>Actual</th>
+                    <th>Difference</th>
+                    <th>Risk</th>
+                    <th>Reason</th>
+                    <th></th>
+
+                  </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                  @for (
+                    discrepancy of filteredDiscrepancies;
+                    track discrepancy.id
+                  ) {
+
+                    <tr>
+
+                      <td class="reference">
+                        {{ discrepancy.orderReference || '—' }}
+                      </td>
+
+
+                      <td>
+                        {{ discrepancy.transactionRef || '—' }}
+                      </td>
+
+
+                      <td>
+
+                        <span class="badge">
+                          {{ discrepancy.discrepancyType }}
+                        </span>
+
+                      </td>
+
+
+                      <td>
+                        {{
+                          formatAmount(
+                            discrepancy.expectedAmount,
+                            discrepancy.currency
+                          )
+                        }}
+                      </td>
+
+
+                      <td>
+                        {{
+                          formatAmount(
+                            discrepancy.actualAmount,
+                            discrepancy.paymentCurrency
+                          )
+                        }}
+                      </td>
+
+
+                      <td
+                        [class]="
+                          getDifferenceClass(
+                            discrepancy.differenceAmount
+                          )
+                        ">
+
+                        {{
+                          formatAmount(
+                            discrepancy.differenceAmount,
+                            discrepancy.currency
+                          )
+                        }}
+
+                      </td>
+
+
+                      <td class="risk-value">
+
+                        {{
+                          formatAmount(
+                            discrepancy.riskAmount,
+                            discrepancy.currency
+                          )
+                        }}
+
+                      </td>
+
+
+                      <td class="reason">
+                        {{ discrepancy.reason }}
+                      </td>
+
+
+                      <td>
+
+                        <button
+                          type="button"
+                          class="details-button"
+                          (click)="
+                            openDetails(discrepancy)
+                          ">
+
+                          Details
+
+                        </button>
+
+                      </td>
+
+                    </tr>
+
+                  }
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          }
+
+        </section>
+
+      }
+
+    }
+
+  </main>
+
+
+  <!-- DETAIL MODAL -->
+
+  @if (selectedDiscrepancy) {
+
+    <div
+      class="modal-backdrop"
+      (click)="closeDetails()">
+
+      <div
+        class="detail-modal"
+        (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+
+          <div>
+
+            <span class="modal-label">
+              Discrepancy Detail
+            </span>
+
+            <h2>
+              {{ selectedDiscrepancy.discrepancyType }}
+            </h2>
+
+          </div>
+
+          <button
+            type="button"
+            class="close-button"
+            (click)="closeDetails()">
+
+            ×
+
+          </button>
+
+        </div>
+
+
+        <div class="detail-grid">
+
+          <div class="detail-item">
+
+            <span>Order Reference</span>
+
+            <strong>
+              {{ selectedDiscrepancy.orderReference || '—' }}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-item">
+
+            <span>Transaction Reference</span>
+
+            <strong>
+              {{ selectedDiscrepancy.transactionRef || '—' }}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-item">
+
+            <span>Expected Amount</span>
+
+            <strong>
+              {{
+                formatAmount(
+                  selectedDiscrepancy.expectedAmount,
+                  selectedDiscrepancy.currency
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-item">
+
+            <span>Actual Amount</span>
+
+            <strong>
+              {{
+                formatAmount(
+                  selectedDiscrepancy.actualAmount,
+                  selectedDiscrepancy.paymentCurrency
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-item">
+
+            <span>Difference</span>
+
+            <strong>
+              {{
+                formatAmount(
+                  selectedDiscrepancy.differenceAmount,
+                  selectedDiscrepancy.currency
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-item">
+
+            <span>Risk Amount</span>
+
+            <strong>
+              {{
+                formatAmount(
+                  selectedDiscrepancy.riskAmount,
+                  selectedDiscrepancy.currency
+                )
+              }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="reason-box">
+
+          <span>Reason</span>
+
+          <p>
+            {{ selectedDiscrepancy.reason }}
+          </p>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeDetails()">
+
+            Close
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>
