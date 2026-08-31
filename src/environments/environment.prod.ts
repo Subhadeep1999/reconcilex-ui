@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: '/api'
+  apiUrl: 'https://reconcilex-backend.onrender.com/api'
 };
